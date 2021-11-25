@@ -3,12 +3,9 @@ package dydx
 import (
 	"dydx-v3-go/modules"
 	"github.com/umbracle/go-web3/jsonrpc"
+	"log"
+	"os"
 	"strings"
-)
-
-const (
-	WebProviderUrl  = "http://localhost:8545"
-	EthereumAddress = "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b"
 )
 
 type Client struct {
@@ -22,6 +19,7 @@ type Client struct {
 	EthSigner                 *modules.EthWeb3Signer
 	DefaultAddress            string
 	NetworkId                 int
+	Logger                    *log.Logger
 
 	Private    *modules.Private
 	OnBoarding *modules.OnBoarding
@@ -36,7 +34,7 @@ func DefaultClient(networkId int, host, ethAddress string, web3 *jsonrpc.Client)
 	}
 	ethSigner := &modules.EthWeb3Signer{Web3: web3}
 	accounts, _ := web3.Eth().Accounts()
-	defaultAddress := accounts[1].String()
+	defaultAddress := accounts[0].String()
 	if ethAddress != "" {
 		defaultAddress = ethAddress
 	}
@@ -51,6 +49,7 @@ func DefaultClient(networkId int, host, ethAddress string, web3 *jsonrpc.Client)
 		Web3:           web3,
 		DefaultAddress: defaultAddress,
 		EthSigner:      ethSigner,
+		Logger:         log.New(os.Stderr, "dydx-v3-go ", log.LstdFlags),
 	}
 	client.OnBoarding = &modules.OnBoarding{
 		Host:       host,
@@ -58,7 +57,22 @@ func DefaultClient(networkId int, host, ethAddress string, web3 *jsonrpc.Client)
 		NetworkId:  networkId,
 		EthAddress: defaultAddress,
 		Singer:     modules.NewSigner(ethSigner, networkId),
+		Logger:     client.Logger,
 	}
-	//client.ApiKeyCredentials = client.OnBoarding.RecoverDefaultApiCredentials(defaultAddress)
+
+	apiKeyCredentials := client.OnBoarding.RecoverDefaultApiCredentials(defaultAddress)
+	starkKey := client.OnBoarding.DeriveStarkKey(defaultAddress)
+
+	client.ApiKeyCredentials = apiKeyCredentials
+	client.StarkPrivateKey = starkKey
+
+	client.Private = &modules.Private{
+		Host:              host,
+		NetworkId:         networkId,
+		StarkPrivateKey:   starkKey,
+		DefaultAddress:    defaultAddress,
+		ApiKeyCredentials: apiKeyCredentials,
+		Logger:            client.Logger,
+	}
 	return client
 }

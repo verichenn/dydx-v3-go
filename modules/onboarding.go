@@ -3,7 +3,10 @@ package modules
 import (
 	"encoding/base64"
 	"encoding/hex"
+	"fmt"
 	"github.com/ethereum/go-ethereum/common/math"
+	"log"
+	"math/big"
 	"strings"
 )
 
@@ -15,6 +18,7 @@ type OnBoarding struct {
 	StarkPublicKey            string
 	StarkPublicKeyYCoordinate string
 	Singer                    *SignOnboardingAction
+	Logger                    *log.Logger
 }
 
 type ApiKeyCredentials struct {
@@ -48,12 +52,23 @@ func (board OnBoarding) RecoverDefaultApiCredentials(ethereumAddress string) Api
 		keyHex[16:20],
 		keyHex[20:],
 	}, "-")
-
 	return ApiKeyCredentials{
 		Key:        base64.URLEncoding.EncodeToString(secretBytes),
 		Secret:     keyUuid,
 		Passphrase: base64.URLEncoding.EncodeToString(passphraseBytes),
 	}
+}
+
+func (board OnBoarding) DeriveStarkKey(ethereumAddress string) string {
+	signature := board.Singer.Sign(ethereumAddress, map[string]interface{}{"action": OffChainKeyDerivationAction})
+	sig, _ := new(big.Int).SetString(signature, 0)
+	data := [][]interface{}{{"uint256"}, {sig.String()}}
+
+	hashedSignature := SolidityKeccak(data)
+
+	privateKey, _ := new(big.Int).SetString(hashedSignature, 0)
+	privateKey = new(big.Int).Rsh(privateKey, 5)
+	return fmt.Sprintf("0x%s", privateKey.Text(16))
 }
 
 func (board OnBoarding) sign(signerAddress, action string) string {

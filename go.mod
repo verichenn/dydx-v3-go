@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/ethereum/go-ethereum v1.10.13
 	github.com/miguelmota/go-solidity-sha3 v0.1.1
+	github.com/satori/go.uuid v1.2.0
 	github.com/umbracle/go-web3 v0.0.0-20211123214134-38b507e6c018
 	github.com/yanue/starkex v0.0.0-20211122094927-61a9aa6b8d97
 )

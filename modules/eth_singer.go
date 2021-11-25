@@ -24,10 +24,3 @@ func signTypedData(eip712Message map[string]interface{}, web3Singer *EthWeb3Sign
 	}
 	return out
 }
-
-type EthKeySigner struct {
-}
-
-func (keySinger *EthKeySigner) sign(eip712Message map[string]interface{}, messageHash, optSingerAddress string) string {
-	panic("implement me")
-}

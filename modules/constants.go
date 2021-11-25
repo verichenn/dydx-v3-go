@@ -10,4 +10,9 @@ const (
 
 	OffChainOnboardingAction    = "dYdX Onboarding"
 	OffChainKeyDerivationAction = "dYdX STARK Key"
+
+	ApiHostMainnet = "https://api.dydx.exchange"
+	ApiHostRopsten = "https://api.stage.dydx.exchange"
+	WsHostMainnet  = "wss://api.dydx.exchange/v3/ws"
+	WsHostRopsten  = "wss://api.stage.dydx.exchange/v3/ws"
 )

@@ -3,13 +3,14 @@ package modules
 import (
 	"crypto/hmac"
 	"crypto/sha256"
+	"dydx-v3-go/helpers"
 	"encoding/base64"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/yanue/starkex"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -22,6 +23,7 @@ type Private struct {
 	StarkPrivateKey   string
 	DefaultAddress    string
 	ApiKeyCredentials ApiKeyCredentials
+	Logger            *log.Logger
 }
 
 type ApiStarkwareSigned struct {
@@ -47,20 +49,13 @@ type ApiOrder struct {
 	//PositionId             int64  `json:"position_id"`
 }
 
-func NewPrivate(host string) *Private {
-	p := &Private{
-		Host:              host,
-		NetworkId:         0,
-		StarkPrivateKey:   "",
-		DefaultAddress:    "",
-		ApiKeyCredentials: ApiKeyCredentials{},
-	}
-	return p
-}
-
 func (p Private) GetAccount(ethereumAddress string) {
-	uri := fmt.Sprintf("/accounts/%s", ethereumAddress)
-	p.get(uri, nil)
+	if ethereumAddress == "" {
+		ethereumAddress = p.DefaultAddress
+	}
+	uri := fmt.Sprintf("accounts/%s", helpers.GetAccountId(ethereumAddress))
+	res, _ := p.get(uri, nil)
+	fmt.Println(string(res))
 }
 
 func (p Private) CreateOrder(input *ApiOrder, positionId int64) {
@@ -84,10 +79,7 @@ func (p Private) CreateOrder(input *ApiOrder, positionId int64) {
 }
 
 func (p Private) get(endpoint string, params url.Values) ([]byte, error) {
-	encodeParams := params.Encode()
-	requestUrl := fmt.Sprintf("%s?%s", endpoint, encodeParams)
-	return p.execute(http.MethodGet, requestUrl, "")
-
+	return p.execute(http.MethodGet, endpoint, "{}")
 }
 
 func (p Private) post(endpoint string, data interface{}) ([]byte, error) {
@@ -106,16 +98,19 @@ func (p Private) execute(method, endpoint string, data string) ([]byte, error) {
 	}
 	resp, err := p.doExecute(method, requestPath, headers, data)
 	if err != nil {
+		p.Logger.Panic(err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		p.Logger.Println("wrong status code: ", resp.StatusCode)
 		return nil, fmt.Errorf("wrong status code: %d", resp.StatusCode)
 	}
 
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		p.Logger.Panic(err)
 		return nil, err
 	}
 	return respBody, nil
@@ -145,10 +140,10 @@ func generateNowISO() string {
 }
 
 func (p Private) sign(requestPath, method, isoTimestamp, body string) string {
-	messageString := fmt.Sprintf("%s%s%s%s", isoTimestamp, method, requestPath, body)
-	h := hmac.New(sha256.New, []byte(base64.StdEncoding.EncodeToString([]byte(p.ApiKeyCredentials.Secret))))
-	h.Write([]byte(messageString))
-	sha := hex.EncodeToString(h.Sum(nil))
-	return base64.StdEncoding.EncodeToString([]byte(sha))
-
+	message := fmt.Sprintf("%s%s%s%s", isoTimestamp, method, requestPath, body)
+	key := []byte(base64.URLEncoding.EncodeToString([]byte(p.ApiKeyCredentials.Secret)))
+	h := hmac.New(sha256.New, key)
+	h.Write([]byte(message))
+	signData := base64.URLEncoding.EncodeToString(h.Sum(nil))
+	return signData
 }
