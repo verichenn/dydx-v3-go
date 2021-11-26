@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"dydx-v3-go/helpers"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
@@ -28,19 +29,19 @@ type ApiKeyCredentials struct {
 }
 
 func (board OnBoarding) RecoverDefaultApiCredentials(ethereumAddress string) ApiKeyCredentials {
-	signature := board.Singer.Sign(ethereumAddress, map[string]interface{}{"action": OffChainOnboardingAction})
+	signature := board.Singer.Sign(ethereumAddress, map[string]interface{}{"action": helpers.OffChainOnboardingAction})
 	rHex := signature[2:66]
 	rInt, _ := math.MaxBig256.SetString(rHex, 16)
 
 	rData := [][]interface{}{{"uint256"}, {rInt.String()}}
 
-	keccak := SolidityKeccak(rData)
+	keccak := helpers.SolidityKeccak(rData)
 	hashedRBytes := []byte(keccak)
 	secretBytes := hashedRBytes[:30]
 	sHex := signature[66:130]
 	sInt, _ := math.MaxBig256.SetString(sHex, 16)
 	sData := [][]interface{}{{"uint256"}, {sInt.String()}}
-	hashedSBytes := []byte(SolidityKeccak(sData))
+	hashedSBytes := []byte(helpers.SolidityKeccak(sData))
 	keyBytes := hashedSBytes[:16]
 	passphraseBytes := hashedSBytes[16:31]
 
@@ -60,11 +61,11 @@ func (board OnBoarding) RecoverDefaultApiCredentials(ethereumAddress string) Api
 }
 
 func (board OnBoarding) DeriveStarkKey(ethereumAddress string) string {
-	signature := board.Singer.Sign(ethereumAddress, map[string]interface{}{"action": OffChainKeyDerivationAction})
+	signature := board.Singer.Sign(ethereumAddress, map[string]interface{}{"action": helpers.OffChainKeyDerivationAction})
 	sig, _ := new(big.Int).SetString(signature, 0)
 	data := [][]interface{}{{"uint256"}, {sig.String()}}
 
-	hashedSignature := SolidityKeccak(data)
+	hashedSignature := helpers.SolidityKeccak(data)
 
 	privateKey, _ := new(big.Int).SetString(hashedSignature, 0)
 	privateKey = new(big.Int).Rsh(privateKey, 5)

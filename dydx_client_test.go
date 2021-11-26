@@ -1,6 +1,7 @@
 package dydx
 
 import (
+	"dydx-v3-go/helpers"
 	"dydx-v3-go/modules"
 	"fmt"
 	"github.com/umbracle/go-web3/jsonrpc"
@@ -16,7 +17,7 @@ const (
 
 func TestCreateOrder(t *testing.T) {
 	web3, _ := jsonrpc.NewClient("http://localhost:8545")
-	c := DefaultClient(3, modules.ApiHostRopsten, EthereumAddress, web3)
+	c := DefaultClient(3, helpers.ApiHostRopsten, EthereumAddress, web3)
 	c.Private.GetAccount("")
 }
 
@@ -25,15 +26,15 @@ func TestRecoverDefaultApiKeyCredentialsOnRopstenFromWeb3(t *testing.T) {
 	client := DefaultClient(3, DefaultHost, "", web3)
 	fmt.Println(client.OnBoarding.RecoverDefaultApiCredentials(client.DefaultAddress))*/
 	sData := [][]interface{}{{"bool"}, {true}}
-	fmt.Println(modules.SolidityKeccak(sData))
+	fmt.Println(helpers.SolidityKeccak(sData))
 }
 
 func TestSignViaLocalNode(t *testing.T) {
 	web3, _ := jsonrpc.NewClient("http://localhost:8545")
 	signer := &modules.EthWeb3Signer{Web3: web3}
-	actionSinger := modules.NewSigner(signer, modules.NetworkIdMainnet)
+	actionSinger := modules.NewSigner(signer, helpers.NetworkIdMainnet)
 	sign := actionSinger.Sign(EthereumAddress,
-		map[string]interface{}{"action": modules.OffChainOnboardingAction})
+		map[string]interface{}{"action": helpers.OffChainOnboardingAction})
 	fmt.Println(sign)
 }
 

@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"dydx-v3-go/helpers"
 	"fmt"
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
 )
@@ -45,8 +46,8 @@ func (a *SignOnboardingAction) Sign(signerAddress string, message map[string]int
 
 func (a *SignOnboardingAction) verify(typedSignature, expectedSignerAddress, message string) bool {
 	messageHash := a.GetHash(message)
-	signer := EcRecoverTypedSignature(messageHash, typedSignature)
-	return AddressAreEqual(signer, expectedSignerAddress)
+	signer := helpers.EcRecoverTypedSignature(messageHash, typedSignature)
+	return helpers.AddressAreEqual(signer, expectedSignerAddress)
 }
 
 func (a *SignOnboardingAction) GetEIP712Message(message map[string]interface{}) map[string]interface{} {
@@ -77,7 +78,7 @@ func (a *SignOnboardingAction) GetEIP712Message(message map[string]interface{}) 
 		"primaryType": structName,
 		"message":     message,
 	}
-	if a.NetworkId == NetworkIdMainnet {
+	if a.NetworkId == helpers.NetworkIdMainnet {
 		msg := eip712Message["message"].(map[string]interface{})
 		msg["onlySignOn"] = "https://trade.dydx.exchange"
 	}
@@ -96,13 +97,13 @@ func (a *SignOnboardingAction) GetEip712Hash(structHash string) string {
 func (a *SignOnboardingAction) GetDomainHash() string {
 	fact := solsha3.SoliditySHA3(
 		[]string{"bytes32", "bytes32", "bytes32", "uint256"},
-		[]interface{}{HashString(Eip712DomainStringNoContract), HashString(Domain), HashString(Version), a.NetworkId},
+		[]interface{}{helpers.HashString(Eip712DomainStringNoContract), helpers.HashString(Domain), helpers.HashString(Version), a.NetworkId},
 	)
 	return fmt.Sprintf("0x%x", fact)
 }
 
 func (a *SignOnboardingAction) GetEIP712Struct() []map[string]string {
-	if a.NetworkId == NetworkIdMainnet {
+	if a.NetworkId == helpers.NetworkIdMainnet {
 		return Eip712OnboardingActionStruct
 	} else {
 		return Eip712OnboardingActionStructTestnet
@@ -115,19 +116,19 @@ func (a *SignOnboardingAction) GetEIP712StructName() string {
 
 func (a *SignOnboardingAction) GetHash(action string) string {
 	var eip712StructStr string
-	if a.NetworkId == NetworkIdMainnet {
+	if a.NetworkId == helpers.NetworkIdMainnet {
 		eip712StructStr = Eip712OnboardingActionStructString
 	} else {
 		eip712StructStr = Eip712OnboardingActionStructStringTestnet
 	}
 	data := [][]string{
 		{"bytes32", "bytes32"},
-		{HashString(eip712StructStr), HashString(action)},
+		{helpers.HashString(eip712StructStr), helpers.HashString(action)},
 	}
-	if a.NetworkId == NetworkIdMainnet {
+	if a.NetworkId == helpers.NetworkIdMainnet {
 		data[0] = append(data[0], "bytes32")
-		data[1] = append(data[1], HashString(OnlySignOnDomainMainnet))
+		data[1] = append(data[1], helpers.HashString(OnlySignOnDomainMainnet))
 	}
-	structHash := SolidityKeccak(data)
+	structHash := helpers.SolidityKeccak(data)
 	return a.GetEip712Hash(structHash)
 }

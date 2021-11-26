@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"dydx-v3-go/helpers"
 	"github.com/umbracle/go-web3/jsonrpc"
 )
 
@@ -14,7 +15,7 @@ type EthWeb3Signer struct {
 
 func (web3Singer *EthWeb3Signer) sign(eip712Message map[string]interface{}, messageHash, address string) string {
 	rawSignature := signTypedData(eip712Message, web3Singer, address)
-	return createTypedSignature(rawSignature, SignatureTypeNoPrepend)
+	return helpers.CreateTypedSignature(rawSignature, helpers.SignatureTypeNoPrepend)
 }
 
 func signTypedData(eip712Message map[string]interface{}, web3Singer *EthWeb3Signer, address string) string {

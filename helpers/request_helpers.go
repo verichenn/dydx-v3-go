@@ -1,9 +1,10 @@
-package modules
+package helpers
 
 import (
 	"fmt"
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
 	"math/rand"
+	"net/url"
 	"strconv"
 	"strings"
 )
@@ -12,7 +13,14 @@ func RandomClientId() string {
 	return strconv.Itoa(rand.Int())
 }
 
-func createTypedSignature(signature string, sigType int) string {
+func GenerateQueryPath(url string, params url.Values) string {
+	if len(params) == 0 {
+		return url
+	}
+	return fmt.Sprintf("%s?%s", url, params.Encode())
+}
+
+func CreateTypedSignature(signature string, sigType int) string {
 	return fmt.Sprintf("%s0%s", fixRawSignature(signature), strconv.Itoa(sigType))
 }
 

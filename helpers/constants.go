@@ -1,4 +1,4 @@
-package modules
+package helpers
 
 const (
 	SignatureTypeNoPrepend   = 0

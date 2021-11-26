@@ -6,14 +6,14 @@ import (
 	"strings"
 )
 
+var namespace = Must(FromString("0f9da948-a6fb-4c45-9edc-4685c3f3317d"))
+
 func getUserId(address string) string {
-	nameSpace := Must(FromString("0f9da948-a6fb-4c45-9edc-4685c3f3317d"))
-	return uuid.NewV5(nameSpace, address).String()
+	return uuid.NewV5(namespace, address).String()
 }
 
 func GetAccountId(address string) string {
-	nameSpace := Must(FromString("0f9da948-a6fb-4c45-9edc-4685c3f3317d"))
-	return uuid.NewV5(nameSpace, getUserId(strings.ToLower(address))+strconv.Itoa(0)).String()
+	return uuid.NewV5(namespace, getUserId(strings.ToLower(address))+strconv.Itoa(0)).String()
 }
 
 func FromString(input string) (u uuid.UUID, err error) {

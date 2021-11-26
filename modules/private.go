@@ -67,7 +67,7 @@ func (p Private) GetAccount(ethereumAddress string) (*types.AccountResponseObjec
 
 func (p Private) CreateOrder(input *ApiOrder, positionId int64) {
 	if input.ClientId == "0" {
-		input.ClientId = RandomClientId()
+		input.ClientId = helpers.RandomClientId()
 	}
 	orderSignParam := starkex.OrderSignParam{
 		NetworkId:  p.NetworkId,
@@ -86,7 +86,7 @@ func (p Private) CreateOrder(input *ApiOrder, positionId int64) {
 }
 
 func (p Private) get(endpoint string, params url.Values) ([]byte, error) {
-	return p.execute(http.MethodGet, endpoint, "{}")
+	return p.execute(http.MethodGet, helpers.GenerateQueryPath(endpoint, params), "")
 }
 
 func (p Private) post(endpoint string, data interface{}) ([]byte, error) {
