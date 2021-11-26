@@ -16,3 +16,10 @@ const (
 	WsHostMainnet  = "wss://api.dydx.exchange/v3/ws"
 	WsHostRopsten  = "wss://api.stage.dydx.exchange/v3/ws"
 )
+
+//position.status
+const (
+	open       = "OPEN"
+	CLOSED     = "CLOSED"
+	LIQUIDATED = "LIQUIDATED"
+)

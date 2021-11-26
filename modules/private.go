@@ -4,6 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"dydx-v3-go/helpers"
+	"dydx-v3-go/types"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -49,13 +50,19 @@ type ApiOrder struct {
 	//PositionId             int64  `json:"position_id"`
 }
 
-func (p Private) GetAccount(ethereumAddress string) {
+func (p Private) GetAccount(ethereumAddress string) (*types.AccountResponseObject, error) {
 	if ethereumAddress == "" {
 		ethereumAddress = p.DefaultAddress
 	}
 	uri := fmt.Sprintf("accounts/%s", helpers.GetAccountId(ethereumAddress))
 	res, _ := p.get(uri, nil)
-	fmt.Println(string(res))
+	var account *types.AccountResponseObject
+	err := json.Unmarshal(res, &account)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(account)
+	return account, nil
 }
 
 func (p Private) CreateOrder(input *ApiOrder, positionId int64) {
@@ -139,11 +146,11 @@ func generateNowISO() string {
 	return time.Now().Format("2006-01-02T15:04:05.999Z")
 }
 
+//todo to fix
 func (p Private) sign(requestPath, method, isoTimestamp, body string) string {
 	message := fmt.Sprintf("%s%s%s%s", isoTimestamp, method, requestPath, body)
 	key := []byte(base64.URLEncoding.EncodeToString([]byte(p.ApiKeyCredentials.Secret)))
 	h := hmac.New(sha256.New, key)
 	h.Write([]byte(message))
-	signData := base64.URLEncoding.EncodeToString(h.Sum(nil))
-	return signData
+	return base64.URLEncoding.EncodeToString(h.Sum(nil))
 }

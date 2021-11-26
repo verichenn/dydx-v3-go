@@ -43,11 +43,11 @@ func stripHexPrefix(input string) string {
 }
 
 func HashString(input string) string {
-
 	fact := solsha3.SoliditySHA3([]string{"string"}, []string{input})
 	return fmt.Sprintf("0x%x", fact)
 }
 
+// SolidityKeccak todo to fix
 func SolidityKeccak(data ...interface{}) string {
 	fact := solsha3.SoliditySHA3(data)
 	return fmt.Sprintf("0x%x", fact)
