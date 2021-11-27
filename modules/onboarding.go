@@ -5,7 +5,9 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
+	solsha3 "github.com/miguelmota/go-solidity-sha3"
 	"log"
 	"math/big"
 	"strings"
@@ -33,15 +35,12 @@ func (board OnBoarding) RecoverDefaultApiCredentials(ethereumAddress string) Api
 	rHex := signature[2:66]
 	rInt, _ := math.MaxBig256.SetString(rHex, 16)
 
-	rData := [][]interface{}{{"uint256"}, {rInt.String()}}
-
-	keccak := helpers.SolidityKeccak(rData)
-	hashedRBytes := []byte(keccak)
+	hashedRBytes := solsha3.SoliditySHA3([]string{"uint256"}, rInt.String())
 	secretBytes := hashedRBytes[:30]
 	sHex := signature[66:130]
 	sInt, _ := math.MaxBig256.SetString(sHex, 16)
-	sData := [][]interface{}{{"uint256"}, {sInt.String()}}
-	hashedSBytes := []byte(helpers.SolidityKeccak(sData))
+
+	hashedSBytes := solsha3.SoliditySHA3([]string{"uint256"}, sInt.String())
 	keyBytes := hashedSBytes[:16]
 	passphraseBytes := hashedSBytes[16:31]
 
@@ -54,8 +53,8 @@ func (board OnBoarding) RecoverDefaultApiCredentials(ethereumAddress string) Api
 		keyHex[20:],
 	}, "-")
 	return ApiKeyCredentials{
-		Key:        base64.URLEncoding.EncodeToString(secretBytes),
-		Secret:     keyUuid,
+		Secret:     base64.URLEncoding.EncodeToString(secretBytes),
+		Key:        keyUuid,
 		Passphrase: base64.URLEncoding.EncodeToString(passphraseBytes),
 	}
 }
@@ -63,9 +62,9 @@ func (board OnBoarding) RecoverDefaultApiCredentials(ethereumAddress string) Api
 func (board OnBoarding) DeriveStarkKey(ethereumAddress string) string {
 	signature := board.Singer.Sign(ethereumAddress, map[string]interface{}{"action": helpers.OffChainKeyDerivationAction})
 	sig, _ := new(big.Int).SetString(signature, 0)
-	data := [][]interface{}{{"uint256"}, {sig.String()}}
 
-	hashedSignature := helpers.SolidityKeccak(data)
+	sha3 := solsha3.SoliditySHA3([]string{"uint256"}, sig.String())
+	hashedSignature := hexutil.Encode(sha3)
 
 	privateKey, _ := new(big.Int).SetString(hashedSignature, 0)
 	privateKey = new(big.Int).Rsh(privateKey, 5)

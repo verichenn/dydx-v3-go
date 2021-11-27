@@ -146,11 +146,10 @@ func generateNowISO() string {
 	return time.Now().Format("2006-01-02T15:04:05.999Z")
 }
 
-//todo to fix
 func (p Private) sign(requestPath, method, isoTimestamp, body string) string {
 	message := fmt.Sprintf("%s%s%s%s", isoTimestamp, method, requestPath, body)
-	key := []byte(base64.URLEncoding.EncodeToString([]byte(p.ApiKeyCredentials.Secret)))
-	h := hmac.New(sha256.New, key)
+	secret, _ := base64.URLEncoding.DecodeString(p.ApiKeyCredentials.Secret)
+	h := hmac.New(sha256.New, secret)
 	h.Write([]byte(message))
 	return base64.URLEncoding.EncodeToString(h.Sum(nil))
 }

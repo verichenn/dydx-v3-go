@@ -18,13 +18,13 @@ const (
 func TestCreateOrder(t *testing.T) {
 	web3, _ := jsonrpc.NewClient("http://localhost:8545")
 	c := DefaultClient(3, helpers.ApiHostRopsten, EthereumAddress, web3)
-	c.Private.GetAccount("")
+	c.Private.GetAccount("0x9Ff965Be98484736caD79C81152971E0AFe80493")
 }
 
 func TestRecoverDefaultApiKeyCredentialsOnRopstenFromWeb3(t *testing.T) {
-	/*web3, _ := jsonrpc.NewClient("http://localhost:8545")
-	client := DefaultClient(3, DefaultHost, "", web3)
-	fmt.Println(client.OnBoarding.RecoverDefaultApiCredentials(client.DefaultAddress))*/
+	web3, _ := jsonrpc.NewClient("http://localhost:8545")
+	client := DefaultClient(helpers.NetworkIdMainnet, DefaultHost, "", web3)
+	fmt.Println(client.OnBoarding.RecoverDefaultApiCredentials(client.DefaultAddress))
 	sData := [][]interface{}{{"bool"}, {true}}
 	fmt.Println(helpers.SolidityKeccak(sData))
 }
