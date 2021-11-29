@@ -7,10 +7,12 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func RandomClientId() string {
-	return strconv.Itoa(rand.Int())
+	rand.Seed(time.Now().UnixNano())
+	return fmt.Sprintf("%016d", rand.Intn(10000000000000000))
 }
 
 func GenerateQueryPath(url string, params url.Values) string {
@@ -52,12 +54,6 @@ func stripHexPrefix(input string) string {
 
 func HashString(input string) string {
 	fact := solsha3.SoliditySHA3([]string{"string"}, []string{input})
-	return fmt.Sprintf("0x%x", fact)
-}
-
-// SolidityKeccak todo to fix
-func SolidityKeccak(data ...interface{}) string {
-	fact := solsha3.SoliditySHA3(data)
 	return fmt.Sprintf("0x%x", fact)
 }
 

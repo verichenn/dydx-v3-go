@@ -58,14 +58,13 @@ func (p Private) GetAccount(ethereumAddress string) (*types.Account, error) {
 	uri := fmt.Sprintf("accounts/%s", helpers.GetAccountId(ethereumAddress))
 	res, _ := p.get(uri, nil)
 	var accountResponse *types.AccountResponse
-	err := json.Unmarshal(res, &accountResponse)
-	if err != nil {
+	if err := json.Unmarshal(res, &accountResponse); err != nil {
 		return nil, err
 	}
 	return accountResponse.Account, nil
 }
 
-func (p Private) CreateOrder(input *ApiOrder, positionId int64) {
+func (p Private) CreateOrder(input *ApiOrder, positionId int64) (*types.Order, error) {
 	orderSignParam := starkex.OrderSignParam{
 		NetworkId:  p.NetworkId,
 		PositionId: positionId,
@@ -77,14 +76,31 @@ func (p Private) CreateOrder(input *ApiOrder, positionId int64) {
 		ClientId:   input.ClientId,
 		Expiration: input.Expiration,
 	}
-	privateKey := p.StarkPrivateKey[2:]
-	signature, err := starkex.OrderSign(privateKey, orderSignParam)
+	signature, err := starkex.OrderSign(p.StarkPrivateKey[2:], orderSignParam)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return nil, errors.New("sign error")
 	}
 	input.Signature = signature
-	p.post("orders", input)
+	res, _ := p.post("orders", input)
+	var orderResponse *types.OrderResponse
+	if err = json.Unmarshal(res, &orderResponse); err != nil {
+		return nil, err
+	}
+	return orderResponse.Order, nil
+}
+
+func (p Private) GetPositions(market string) (*types.Position, error) {
+	params := url.Values{}
+	params.Add("market", market)
+	res, err := p.get("positions", params)
+	if err != nil {
+		return nil, errors.New("request error")
+	}
+	var position *types.Position
+	if err = json.Unmarshal(res, position); err != nil {
+		return nil, errors.New("json passer error")
+	}
+	return position, nil
 }
 
 func (p Private) get(endpoint string, params url.Values) ([]byte, error) {
@@ -120,8 +136,8 @@ func (p Private) execute(method, endpoint string, data string) ([]byte, error) {
 	}
 
 	respBody, err := ioutil.ReadAll(resp.Body)
+	fmt.Printf("---->response body:%s\n", respBody)
 	if err != nil {
-		p.Logger.Panic(err)
 		return nil, err
 	}
 	return respBody, nil
@@ -141,7 +157,7 @@ func (p Private) doExecute(method string, requestPath string, headers map[string
 	req.Header.Add("Content-Type", "application/json")
 
 	c := &http.Client{
-		Timeout: time.Second * 3,
+		Timeout: time.Second * 5,
 	}
 	return c.Do(req)
 

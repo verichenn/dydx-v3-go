@@ -36,3 +36,28 @@ type Position struct {
 	SumOpen       string      `json:"sumOpen"`
 	SumClose      string      `json:"sumClose"`
 }
+
+type OrderResponse struct {
+	Order *Order `json:"order"`
+}
+
+type Order struct {
+	ID              string    `json:"id"`
+	ClientID        string    `json:"clientId"`
+	AccountID       string    `json:"accountId"`
+	Market          string    `json:"market"`
+	Side            string    `json:"side"`
+	Price           string    `json:"price"`
+	TriggerPrice    string    `json:"triggerPrice"`
+	TrailingPercent string    `json:"trailingPercent"`
+	Size            string    `json:"size"`
+	RemainingSize   string    `json:"remainingSize"`
+	Type            string    `json:"type"`
+	CreatedAt       time.Time `json:"createdAt"`
+	UnfillableAt    string    `json:"unfillableAt"`
+	ExpiresAt       time.Time `json:"expiresAt"`
+	Status          string    `json:"status"`
+	TimeInForce     string    `json:"timeInForce"`
+	PostOnly        bool      `json:"postOnly"`
+	CancelReason    string    `json:"cancelReason"`
+}

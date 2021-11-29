@@ -3,6 +3,7 @@ package modules
 import (
 	"dydx-v3-go/helpers"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
 )
 
@@ -129,6 +130,6 @@ func (a *SignOnboardingAction) GetHash(action string) string {
 		data[0] = append(data[0], "bytes32")
 		data[1] = append(data[1], helpers.HashString(OnlySignOnDomainMainnet))
 	}
-	structHash := helpers.SolidityKeccak(data)
-	return a.GetEip712Hash(structHash)
+	structHash := solsha3.SoliditySHA3(data[0], data[1])
+	return a.GetEip712Hash(hexutil.Encode(structHash))
 }

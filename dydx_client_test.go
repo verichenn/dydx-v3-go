@@ -20,6 +20,10 @@ func TestCreateOrder(t *testing.T) {
 	options := Options{}
 	client := DefaultClient(options)
 	account, _ := client.Private.GetAccount("")
+
+	positions, _ := client.Private.GetPositions("BTC-USD")
+	fmt.Println(positions)
+
 	apiOrder := &modules.ApiOrder{
 		ApiStarkwareSigned: modules.ApiStarkwareSigned{Expiration: expiration()},
 		Market:             "BTC-USD",
@@ -32,7 +36,8 @@ func TestCreateOrder(t *testing.T) {
 		PostOnly:           true,
 		LimitFee:           "0.0015",
 	}
-	client.Private.CreateOrder(apiOrder, account.PositionId)
+	order, _ := client.Private.CreateOrder(apiOrder, account.PositionId)
+	fmt.Println(order)
 }
 
 func expiration() string {
