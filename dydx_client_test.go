@@ -4,29 +4,39 @@ import (
 	"dydx-v3-go/helpers"
 	"dydx-v3-go/modules"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	solsha3 "github.com/miguelmota/go-solidity-sha3"
 	"github.com/umbracle/go-web3/jsonrpc"
 	"testing"
+	"time"
 )
 
 const (
-	//Production (Mainnet): https://api.dydx.exchange
-	//Staging (Ropsten): https://api.stage.dydx.exchange
 	DefaultHost     = "http://localhost:8080"
 	EthereumAddress = "0x9Ff965Be98484736caD79C81152971E0AFe80493"
 )
 
 func TestCreateOrder(t *testing.T) {
-	web3, _ := jsonrpc.NewClient("http://localhost:8545")
-	c := DefaultClient(3, helpers.ApiHostRopsten, EthereumAddress, web3)
-	c.Private.GetAccount("0x9Ff965Be98484736caD79C81152971E0AFe80493")
+	options := Options{}
+	client := DefaultClient(options)
+	account, _ := client.Private.GetAccount("")
+	apiOrder := &modules.ApiOrder{
+		ApiStarkwareSigned: modules.ApiStarkwareSigned{Expiration: expiration()},
+		Market:             "BTC-USD",
+		Side:               "BUY",
+		Type:               "LIMIT",
+		Size:               "1",
+		Price:              "1",
+		ClientId:           helpers.RandomClientId(),
+		TimeInForce:        "GTT",
+		PostOnly:           true,
+		LimitFee:           "0.0015",
+	}
+	client.Private.CreateOrder(apiOrder, account.PositionId)
 }
 
-func TestRecoverDefaultApiKeyCredentialsOnRopstenFromWeb3(t *testing.T) {
-	web3, _ := jsonrpc.NewClient("http://localhost:8545")
-	client := DefaultClient(helpers.NetworkIdMainnet, DefaultHost, "", web3)
-	fmt.Println(client.OnBoarding.RecoverDefaultApiCredentials(client.DefaultAddress))
-	sData := [][]interface{}{{"bool"}, {true}}
-	fmt.Println(helpers.SolidityKeccak(sData))
+func expiration() string {
+	return time.Now().Add(5 * time.Minute).UTC().Format("2006-01-02T15:04:05.999Z")
 }
 
 func TestSignViaLocalNode(t *testing.T) {
@@ -39,9 +49,6 @@ func TestSignViaLocalNode(t *testing.T) {
 }
 
 func TestDeriveStarkKey(t *testing.T) {
-	web3, _ := jsonrpc.NewClient("http://localhost:8545")
-	c := DefaultClient(3, DefaultHost, "", web3)
-
-	key := c.OnBoarding.DeriveStarkKey(EthereumAddress)
-	fmt.Println(key)
+	sha3 := solsha3.SoliditySHA3([]string{"address"}, "0x49EdDD3769c0712032808D86597B84ac5c2F5614")
+	fmt.Println(hexutil.Encode(sha3))
 }

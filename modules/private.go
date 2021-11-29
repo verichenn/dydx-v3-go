@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"dydx-v3-go/helpers"
@@ -23,7 +24,7 @@ type Private struct {
 	NetworkId         int
 	StarkPrivateKey   string
 	DefaultAddress    string
-	ApiKeyCredentials ApiKeyCredentials
+	ApiKeyCredentials *ApiKeyCredentials
 	Logger            *log.Logger
 }
 
@@ -40,35 +41,31 @@ type ApiOrder struct {
 	Size            string `json:"size"`
 	Price           string `json:"price"`
 	ClientId        string `json:"clientId"`
-	TimeInForce     string `json:"time_in_force"`
-	PostOnly        string `json:"post_only"`
-	LimitFee        string `json:"limit_fee"`
-	CancelId        string `json:"cancel_id"`
-	TriggerPrice    string `json:"trigger_price"`
-	TrailingPercent string `json:"trailing_percent"`
+	TimeInForce     string `json:"timeInForce"`
+	PostOnly        bool   `json:"postOnly"`
+	LimitFee        string `json:"limitFee"`
+	CancelId        string `json:"cancelId,omitempty"`
+	TriggerPrice    string `json:"triggerPrice,omitempty"`
+	TrailingPercent string `json:"trailingPercent,omitempty"`
 	//NetworkId              int    `json:"network_id"`
 	//PositionId             int64  `json:"position_id"`
 }
 
-func (p Private) GetAccount(ethereumAddress string) (*types.AccountResponseObject, error) {
+func (p Private) GetAccount(ethereumAddress string) (*types.Account, error) {
 	if ethereumAddress == "" {
 		ethereumAddress = p.DefaultAddress
 	}
 	uri := fmt.Sprintf("accounts/%s", helpers.GetAccountId(ethereumAddress))
 	res, _ := p.get(uri, nil)
-	var account *types.AccountResponseObject
-	err := json.Unmarshal(res, &account)
+	var accountResponse *types.AccountResponse
+	err := json.Unmarshal(res, &accountResponse)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(account)
-	return account, nil
+	return accountResponse.Account, nil
 }
 
 func (p Private) CreateOrder(input *ApiOrder, positionId int64) {
-	if input.ClientId == "0" {
-		input.ClientId = helpers.RandomClientId()
-	}
 	orderSignParam := starkex.OrderSignParam{
 		NetworkId:  p.NetworkId,
 		PositionId: positionId,
@@ -77,10 +74,15 @@ func (p Private) CreateOrder(input *ApiOrder, positionId int64) {
 		HumanSize:  input.Size,
 		HumanPrice: input.Price,
 		LimitFee:   input.LimitFee,
-		ClientId:   input.ClientId,
+		ClientId:   helpers.RandomClientId(),
 		Expiration: input.Expiration,
 	}
-	signature, _ := starkex.OrderSign(p.StarkPrivateKey, orderSignParam)
+	privateKey := p.StarkPrivateKey[2:]
+	signature, err := starkex.OrderSign(privateKey, orderSignParam)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	input.Signature = signature
 	p.post("orders", input)
 }
@@ -111,7 +113,9 @@ func (p Private) execute(method, endpoint string, data string) ([]byte, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		p.Logger.Println("wrong status code: ", resp.StatusCode)
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+		p.Logger.Printf("wrong status code: %d,err msg:%s", resp.StatusCode, buf.String())
 		return nil, fmt.Errorf("wrong status code: %d", resp.StatusCode)
 	}
 
@@ -143,7 +147,7 @@ func (p Private) doExecute(method string, requestPath string, headers map[string
 }
 
 func generateNowISO() string {
-	return time.Now().Format("2006-01-02T15:04:05.999Z")
+	return time.Now().UTC().Format("2006-01-02T15:04:05.999Z")
 }
 
 func (p Private) sign(requestPath, method, isoTimestamp, body string) string {

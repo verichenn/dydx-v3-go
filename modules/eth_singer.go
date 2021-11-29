@@ -18,10 +18,20 @@ func (web3Singer *EthWeb3Signer) sign(eip712Message map[string]interface{}, mess
 	return helpers.CreateTypedSignature(rawSignature, helpers.SignatureTypeNoPrepend)
 }
 
+//https://github.com/dydxprotocol/dydx-v3-python/issues/62
 func signTypedData(eip712Message map[string]interface{}, web3Singer *EthWeb3Signer, address string) string {
 	var out string
 	if err := web3Singer.Web3.Call("eth_signTypedData", &out, address, eip712Message); err != nil {
 		panic(err)
 	}
 	return out
+}
+
+type EthKeySinger struct {
+	Address    string
+	PrivateKey string
+}
+
+func (keySinger EthKeySinger) sign(eip712Message map[string]interface{}, messageHash, optSingerAddress string) string {
+	panic("implement me")
 }

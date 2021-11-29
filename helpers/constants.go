@@ -5,7 +5,7 @@ const (
 	SignatureTypeDecimal     = 1
 	SignatureTypeHexadecimal = 2
 
-	NetworkIdMainnet = 5777
+	NetworkIdMainnet = 1
 	NetworkIdRopsten = 3
 
 	OffChainOnboardingAction    = "dYdX Onboarding"

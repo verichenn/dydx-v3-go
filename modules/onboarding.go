@@ -30,7 +30,7 @@ type ApiKeyCredentials struct {
 	Passphrase string
 }
 
-func (board OnBoarding) RecoverDefaultApiCredentials(ethereumAddress string) ApiKeyCredentials {
+func (board OnBoarding) RecoverDefaultApiCredentials(ethereumAddress string) *ApiKeyCredentials {
 	signature := board.Singer.Sign(ethereumAddress, map[string]interface{}{"action": helpers.OffChainOnboardingAction})
 	rHex := signature[2:66]
 	rInt, _ := math.MaxBig256.SetString(rHex, 16)
@@ -52,7 +52,7 @@ func (board OnBoarding) RecoverDefaultApiCredentials(ethereumAddress string) Api
 		keyHex[16:20],
 		keyHex[20:],
 	}, "-")
-	return ApiKeyCredentials{
+	return &ApiKeyCredentials{
 		Secret:     base64.URLEncoding.EncodeToString(secretBytes),
 		Key:        keyUuid,
 		Passphrase: base64.URLEncoding.EncodeToString(passphraseBytes),

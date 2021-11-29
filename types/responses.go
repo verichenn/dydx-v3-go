@@ -2,32 +2,37 @@ package types
 
 import "time"
 
-type AccountResponseObject struct {
-	starkKey           string
-	positionId         string
-	equity             string
-	freeCollateral     string
-	pendingDeposits    string
-	pendingWithdrawals string
-	openPositions      map[string]PositionResponseObject
-	accountNumber      string
-	id                 string
-	quoteBalance       string
+type AccountResponse struct {
+	Account *Account `json:"account"`
 }
 
-type PositionResponseObject struct {
-	market        string
-	status        string
-	side          string
-	size          string
-	maxSize       string
-	entryPrice    string
-	exitPrice     string
-	unrealizedPnl string
-	realizedPnl   string
-	createdAt     time.Time
-	closedAt      time.Time
-	sumOpen       string
-	sumClose      string
-	netFunding    string
+type Account struct {
+	StarkKey           string              `json:"starkKey"`
+	PositionId         int64               `json:"positionId,string"`
+	Equity             string              `json:"equity"`
+	FreeCollateral     string              `json:"freeCollateral"`
+	QuoteBalance       string              `json:"quoteBalance"`
+	PendingDeposits    string              `json:"pendingDeposits"`
+	PendingWithdrawals string              `json:"pendingWithdrawals"`
+	CreatedAt          time.Time           `json:"createdAt"`
+	OpenPositions      map[string]Position `json:"openPositions"`
+	AccountNumber      string              `json:"accountNumber"`
+	ID                 string              `json:"id"`
+}
+
+type Position struct {
+	Market        string      `json:"market"`
+	Status        string      `json:"status"`
+	Side          string      `json:"side"`
+	Size          string      `json:"size"`
+	MaxSize       string      `json:"maxSize"`
+	EntryPrice    string      `json:"entryPrice"`
+	ExitPrice     interface{} `json:"exitPrice"`
+	UnrealizedPnl string      `json:"unrealizedPnl"`
+	RealizedPnl   string      `json:"realizedPnl"`
+	CreatedAt     time.Time   `json:"createdAt"`
+	ClosedAt      interface{} `json:"closedAt"`
+	NetFunding    string      `json:"netFunding"`
+	SumOpen       string      `json:"sumOpen"`
+	SumClose      string      `json:"sumClose"`
 }
