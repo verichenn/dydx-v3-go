@@ -128,7 +128,7 @@ func (p Private) execute(method, endpoint string, data string) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode < http.StatusOK || resp.StatusCode > http.StatusIMUsed {
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(resp.Body)
 		p.Logger.Printf("wrong status code: %d,err msg:%s", resp.StatusCode, buf.String())
@@ -155,6 +155,7 @@ func (p Private) doExecute(method string, requestPath string, headers map[string
 		req.Header.Add(key, val)
 	}
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("User-Agent", "dydx/go")
 
 	c := &http.Client{
 		Timeout: time.Second * 5,
