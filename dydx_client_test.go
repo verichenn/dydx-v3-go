@@ -92,16 +92,16 @@ func TestGetOrder(t *testing.T) {
 }
 
 func TestGetOrders(t *testing.T) {
-	clinet := DefaultClient(options)
+	client := DefaultClient(options)
 	req := types.OrderQueryParam{
 		Market: "BTC-USD",
 		Limit:  100,
 		Type:   "LIMIT",
 	}
-	data, err := clinet.Private.GetOrder(&req)
+	data, err := client.Private.GetOrder(&req)
 	if err != nil {
 		t.Error(err)
 	} else {
-		fmt.Println(string(data))
+		fmt.Println(data.Orders)
 	}
 }

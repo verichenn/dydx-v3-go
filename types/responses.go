@@ -61,3 +61,7 @@ type Order struct {
 	PostOnly        bool      `json:"postOnly"`
 	CancelReason    string    `json:"cancelReason"`
 }
+
+type OrderList struct {
+	Orders []Order `json:"orders"`
+}

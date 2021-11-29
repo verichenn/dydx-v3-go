@@ -104,7 +104,7 @@ func (p Private) GetPositions(market string) (*types.Position, error) {
 	return position, nil
 }
 
-func (p Private) GetOrder(input *types.OrderQueryParam) ([]byte, error) {
+func (p Private) GetOrder(input *types.OrderQueryParam) (types.OrderList, error) {
 	orderQuery := url.Values{}
 	if input.Market != "" {
 		orderQuery.Add("market", input.Market)
@@ -132,7 +132,13 @@ func (p Private) GetOrder(input *types.OrderQueryParam) ([]byte, error) {
 	if input.ReturnLatestOrders != "" {
 		orderQuery.Add("returnLatestOrders", input.ReturnLatestOrders)
 	}
-	return p.get("orders", orderQuery)
+	var result types.OrderList
+	data, err := p.get("orders", orderQuery)
+	if err == nil {
+		json.Unmarshal(data, result)
+		return result, nil
+	}
+	return result, err
 }
 
 //取消订单
