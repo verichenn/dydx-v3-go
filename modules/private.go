@@ -15,6 +15,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -103,6 +104,56 @@ func (p Private) GetPositions(market string) (*types.Position, error) {
 	return position, nil
 }
 
+func (p Private) GetOrder(input *types.OrderQueryParam) ([]byte, error) {
+	orderQuery := url.Values{}
+	if input.Market != "" {
+		orderQuery.Add("market", input.Market)
+	}
+	if input.Status != "" {
+		orderQuery.Add("status", input.Status)
+	}
+
+	if input.Side != "" {
+		orderQuery.Add("side", input.Side)
+	}
+
+	if input.Type != "" {
+		orderQuery.Add("type", input.Type)
+	}
+
+	if input.Limit != 0 {
+		orderQuery.Add("limit", strconv.Itoa(input.Limit))
+	}
+
+	if input.CreatedBeforeOrAt != "" {
+		orderQuery.Add("createdBeforeOrAt", input.CreatedBeforeOrAt)
+	}
+
+	if input.ReturnLatestOrders != "" {
+		orderQuery.Add("returnLatestOrders", input.ReturnLatestOrders)
+	}
+	return p.get("orders", orderQuery)
+}
+
+//取消订单
+func (p Private) CancelOder(orderId string) ([]byte, error) {
+	return p.delete("orders/"+orderId, nil)
+}
+
+//取消订单
+func (p Private) GetOderById(orderId string) (*types.OrderResponse, error) {
+	res, reqErr := p.get("orders/"+orderId, nil)
+
+	if reqErr == nil {
+		var orderResponse *types.OrderResponse
+		if err := json.Unmarshal(res, &orderResponse); err != nil {
+			return nil, err
+		}
+		return orderResponse, nil
+	}
+	return nil, reqErr
+}
+
 func (p Private) get(endpoint string, params url.Values) ([]byte, error) {
 	return p.execute(http.MethodGet, helpers.GenerateQueryPath(endpoint, params), "")
 }
@@ -110,6 +161,15 @@ func (p Private) get(endpoint string, params url.Values) ([]byte, error) {
 func (p Private) post(endpoint string, data interface{}) ([]byte, error) {
 	marshalData, _ := json.Marshal(data)
 	return p.execute(http.MethodPost, endpoint, string(marshalData))
+}
+
+func (p Private) delete(endpoint string, data interface{}) ([]byte, error) {
+	if data != nil {
+		marshalData, _ := json.Marshal(data)
+		return p.execute(http.MethodDelete, endpoint, string(marshalData))
+	} else {
+		return p.execute(http.MethodDelete, endpoint, "")
+	}
 }
 
 func (p Private) execute(method, endpoint string, data string) ([]byte, error) {
