@@ -25,7 +25,7 @@ func TestCreateOrder(t *testing.T) {
 		Market:             "BTC-USD",
 		Side:               "BUY",
 		Type:               "LIMIT",
-		Size:               "1",
+		Size:               "0.001",
 		Price:              "1",
 		ClientId:           helpers.RandomClientId(),
 		TimeInForce:        "GTT",

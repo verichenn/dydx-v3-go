@@ -74,7 +74,7 @@ func (p Private) CreateOrder(input *ApiOrder, positionId int64) {
 		HumanSize:  input.Size,
 		HumanPrice: input.Price,
 		LimitFee:   input.LimitFee,
-		ClientId:   helpers.RandomClientId(),
+		ClientId:   input.ClientId,
 		Expiration: input.Expiration,
 	}
 	privateKey := p.StarkPrivateKey[2:]
@@ -138,6 +138,7 @@ func (p Private) doExecute(method string, requestPath string, headers map[string
 	for key, val := range headers {
 		req.Header.Add(key, val)
 	}
+	req.Header.Add("Content-Type", "application/json")
 
 	c := &http.Client{
 		Timeout: time.Second * 3,
