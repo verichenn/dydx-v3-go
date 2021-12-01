@@ -19,14 +19,14 @@ const (
 
 var options = Options{
 	Host:                      helpers.ApiHostMainnet,
-	StarkPublicKey:            "0x2c256a659da55071d90cdb27c247264b2544d4129746a07df90c97c601cbf39",
-	StarkPrivateKey:           "0x24796a5e3f3b00a90553b7e97a5f76f46d8ed2f7c315cd4cd99614f717de1fe",
-	starkPublicKeyYCoordinate: "0x49257237c10719d38ef7a1523fa41af41e57d8ecbdc9e5294ac2f89781c533a",
-	DefaultEthereumAddress:    "0x93A0b678674BB2bAF5D47B12d33723070d2c8783",
+	StarkPublicKey:            "",
+	StarkPrivateKey:           "",
+	starkPublicKeyYCoordinate: "",
+	DefaultEthereumAddress:    "",
 	ApiKeyCredentials: &modules.ApiKeyCredentials{
-		Key:        "ca3ace6b-849f-ff9b-9a1f-cc6e5c9d978e",
-		Secret:     "ErdvqOj_YSt61LRA_71z4xcZPS29p3DWfl_KBxRb",
-		Passphrase: "491trEHGp4uJ4bZ-c75R",
+		Key:        "",
+		Secret:     "",
+		Passphrase: "",
 	},
 }
 
