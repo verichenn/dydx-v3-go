@@ -1,4 +1,4 @@
-module dydx-v3-go
+module github.com/verichenn/dydx-v3-go
 
 go 1.17
 
