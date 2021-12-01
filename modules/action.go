@@ -45,12 +45,6 @@ func (a *SignOnboardingAction) Sign(signerAddress string, message map[string]int
 	return typedSignature
 }
 
-func (a *SignOnboardingAction) verify(typedSignature, expectedSignerAddress, message string) bool {
-	messageHash := a.GetHash(message)
-	signer := helpers.EcRecoverTypedSignature(messageHash, typedSignature)
-	return helpers.AddressAreEqual(signer, expectedSignerAddress)
-}
-
 func (a *SignOnboardingAction) GetEIP712Message(message map[string]interface{}) map[string]interface{} {
 	structName := a.GetEIP712StructName()
 	eip712Message := map[string]interface{}{

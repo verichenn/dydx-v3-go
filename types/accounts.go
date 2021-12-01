@@ -3,7 +3,7 @@ package types
 import "time"
 
 type AccountResponse struct {
-	Account *Account `json:"account"`
+	Account Account `json:"account"`
 }
 
 type Account struct {
@@ -18,6 +18,10 @@ type Account struct {
 	OpenPositions      map[string]Position `json:"openPositions"`
 	AccountNumber      string              `json:"accountNumber"`
 	ID                 string              `json:"id"`
+}
+
+type PositionResponse struct {
+	Positions []Position `json:"positions"`
 }
 
 type Position struct {
@@ -35,33 +39,4 @@ type Position struct {
 	NetFunding    string      `json:"netFunding"`
 	SumOpen       string      `json:"sumOpen"`
 	SumClose      string      `json:"sumClose"`
-}
-
-type OrderResponse struct {
-	Order *Order `json:"order"`
-}
-
-type Order struct {
-	ID              string    `json:"id"`
-	ClientID        string    `json:"clientId"`
-	AccountID       string    `json:"accountId"`
-	Market          string    `json:"market"`
-	Side            string    `json:"side"`
-	Price           string    `json:"price"`
-	TriggerPrice    string    `json:"triggerPrice"`
-	TrailingPercent string    `json:"trailingPercent"`
-	Size            string    `json:"size"`
-	RemainingSize   string    `json:"remainingSize"`
-	Type            string    `json:"type"`
-	CreatedAt       time.Time `json:"createdAt"`
-	UnfillableAt    string    `json:"unfillableAt"`
-	ExpiresAt       time.Time `json:"expiresAt"`
-	Status          string    `json:"status"`
-	TimeInForce     string    `json:"timeInForce"`
-	PostOnly        bool      `json:"postOnly"`
-	CancelReason    string    `json:"cancelReason"`
-}
-
-type OrderList struct {
-	Orders []Order `json:"orders"`
 }

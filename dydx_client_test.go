@@ -30,26 +30,33 @@ var options = Options{
 	},
 }
 
-func TestCreateOrder(t *testing.T) {
+func TestGetAccount(t *testing.T) {
 	client := DefaultClient(options)
 	account, _ := client.Private.GetAccount("")
+	fmt.Println(account)
+}
 
+func TestGetPositions(t *testing.T) {
+	client := DefaultClient(options)
 	positions, _ := client.Private.GetPositions("BTC-USD")
 	fmt.Println(positions)
+}
 
+func TestCreateOrder(t *testing.T) {
+	client := DefaultClient(options)
 	apiOrder := &modules.ApiOrder{
-		ApiStarkwareSigned: modules.ApiStarkwareSigned{Expiration: expiration()},
-		Market:             "BTC-USD",
-		Side:               "BUY",
-		Type:               "LIMIT",
-		Size:               "0.001",
-		Price:              "1",
-		ClientId:           helpers.RandomClientId(),
-		TimeInForce:        "GTT",
-		PostOnly:           true,
-		LimitFee:           "0.0015",
+		ApiBaseOrder: modules.ApiBaseOrder{Expiration: expiration()},
+		Market:       "BTC-USD",
+		Side:         "BUY",
+		Type:         "LIMIT",
+		Size:         "0.001",
+		Price:        "1",
+		ClientId:     helpers.RandomClientId(),
+		TimeInForce:  "GTT",
+		PostOnly:     true,
+		LimitFee:     "0.0015",
 	}
-	order, _ := client.Private.CreateOrder(apiOrder, account.PositionId)
+	order, _ := client.Private.CreateOrder(apiOrder, 144336)
 	fmt.Println(order)
 }
 
@@ -72,18 +79,18 @@ func TestDeriveStarkKey(t *testing.T) {
 }
 
 func TestCancelOrder(t *testing.T) {
-	clinet := DefaultClient(options)
-	data, err := clinet.Private.CancelOder("412cefb532161e76598f06d022dc6e4efd32a35de13b3f7d9ee4f972ed51766")
+	client := DefaultClient(options)
+	data, err := client.Private.CancelOder("4bf8757c3ed8fb70a9c6e22f5b2fef5f4b4bd67113ed73c00f15874b2029b37")
 	if err != nil {
 		t.Error(err)
 	} else {
-		fmt.Println(string(data))
+		fmt.Println(data)
 	}
 }
 
-func TestGetOrder(t *testing.T) {
-	clinet := DefaultClient(options)
-	data, err := clinet.Private.GetOderById("412cefb532161e76598f06d022dc6e4efd32a35de13b3f7d9ee4f972ed51766")
+func TestGetOrderById(t *testing.T) {
+	client := DefaultClient(options)
+	data, err := client.Private.GetOderById("4bf8757c3ed8fb70a9c6e22f5b2fef5f4b4bd67113ed73c00f15874b2029b37")
 	if err != nil {
 		t.Error(err)
 	} else {
@@ -98,7 +105,7 @@ func TestGetOrders(t *testing.T) {
 		Limit:  100,
 		Type:   "LIMIT",
 	}
-	data, err := client.Private.GetOrder(&req)
+	data, err := client.Private.GetOrders(&req)
 	if err != nil {
 		t.Error(err)
 	} else {

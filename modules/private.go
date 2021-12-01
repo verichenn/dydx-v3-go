@@ -15,7 +15,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -29,13 +28,13 @@ type Private struct {
 	Logger            *log.Logger
 }
 
-type ApiStarkwareSigned struct {
+type ApiBaseOrder struct {
 	Signature  string `json:"signature"`
 	Expiration string `json:"expiration"`
 }
 
 type ApiOrder struct {
-	ApiStarkwareSigned
+	ApiBaseOrder
 	Market          string `json:"market"`
 	Side            string `json:"side"`
 	Type            string `json:"type"`
@@ -48,24 +47,26 @@ type ApiOrder struct {
 	CancelId        string `json:"cancelId,omitempty"`
 	TriggerPrice    string `json:"triggerPrice,omitempty"`
 	TrailingPercent string `json:"trailingPercent,omitempty"`
-	//NetworkId              int    `json:"network_id"`
-	//PositionId             int64  `json:"position_id"`
 }
 
-func (p Private) GetAccount(ethereumAddress string) (*types.Account, error) {
+// GetAccount 查询账户
+// see https://docs.dydx.exchange/?json#get-account
+func (p Private) GetAccount(ethereumAddress string) (types.AccountResponse, error) {
 	if ethereumAddress == "" {
 		ethereumAddress = p.DefaultAddress
 	}
 	uri := fmt.Sprintf("accounts/%s", helpers.GetAccountId(ethereumAddress))
 	res, _ := p.get(uri, nil)
-	var accountResponse *types.AccountResponse
+	accountResponse := types.AccountResponse{}
 	if err := json.Unmarshal(res, &accountResponse); err != nil {
-		return nil, err
+		return accountResponse, err
 	}
-	return accountResponse.Account, nil
+	return accountResponse, nil
 }
 
-func (p Private) CreateOrder(input *ApiOrder, positionId int64) (*types.Order, error) {
+// CreateOrder 创建订单
+// see https://docs.dydx.exchange/?json#create-a-new-order
+func (p Private) CreateOrder(input *ApiOrder, positionId int64) (types.OrderResponse, error) {
 	orderSignParam := starkex.OrderSignParam{
 		NetworkId:  p.NetworkId,
 		PositionId: positionId,
@@ -78,107 +79,93 @@ func (p Private) CreateOrder(input *ApiOrder, positionId int64) (*types.Order, e
 		Expiration: input.Expiration,
 	}
 	signature, err := starkex.OrderSign(p.StarkPrivateKey[2:], orderSignParam)
+
+	orderResponse := types.OrderResponse{}
 	if err != nil {
-		return nil, errors.New("sign error")
+		return orderResponse, errors.New("sign error")
 	}
 	input.Signature = signature
 	res, _ := p.post("orders", input)
-	var orderResponse *types.OrderResponse
+
 	if err = json.Unmarshal(res, &orderResponse); err != nil {
-		return nil, err
+		return orderResponse, err
 	}
-	return orderResponse.Order, nil
+	return orderResponse, nil
 }
 
-func (p Private) GetPositions(market string) (*types.Position, error) {
+// GetPositions 查询持仓
+// see https://docs.dydx.exchange/?json#get-positions
+func (p Private) GetPositions(market string) (types.PositionResponse, error) {
 	params := url.Values{}
 	params.Add("market", market)
 	res, err := p.get("positions", params)
+	position := types.PositionResponse{}
 	if err != nil {
-		return nil, errors.New("request error")
+		return position, errors.New("request error")
 	}
-	var position *types.Position
-	if err = json.Unmarshal(res, position); err != nil {
-		return nil, errors.New("json passer error")
+	if err = json.Unmarshal(res, &position); err != nil {
+		return position, errors.New("json parser error")
 	}
 	return position, nil
 }
 
-func (p Private) GetOrder(input *types.OrderQueryParam) (types.OrderList, error) {
-	orderQuery := url.Values{}
-	if input.Market != "" {
-		orderQuery.Add("market", input.Market)
-	}
-	if input.Status != "" {
-		orderQuery.Add("status", input.Status)
-	}
-
-	if input.Side != "" {
-		orderQuery.Add("side", input.Side)
-	}
-
-	if input.Type != "" {
-		orderQuery.Add("type", input.Type)
-	}
-
-	if input.Limit != 0 {
-		orderQuery.Add("limit", strconv.Itoa(input.Limit))
-	}
-
-	if input.CreatedBeforeOrAt != "" {
-		orderQuery.Add("createdBeforeOrAt", input.CreatedBeforeOrAt)
-	}
-
-	if input.ReturnLatestOrders != "" {
-		orderQuery.Add("returnLatestOrders", input.ReturnLatestOrders)
-	}
-	var result types.OrderList
-	data, err := p.get("orders", orderQuery)
+// GetOrders 查询订单列表
+// see https://docs.dydx.exchange/?json#get-orders
+func (p Private) GetOrders(input *types.OrderQueryParam) (types.OrderListResponse, error) {
+	var result types.OrderListResponse
+	data, err := p.get("orders", input.ToParams())
 	if err == nil {
-		json.Unmarshal(data, result)
+		if err := json.Unmarshal(data, &result); err != nil {
+			return result, err
+		}
 		return result, nil
 	}
 	return result, err
 }
 
-//取消订单
-func (p Private) CancelOder(orderId string) ([]byte, error) {
-	return p.delete("orders/"+orderId, nil)
+// CancelOder 取消订单
+// see https://docs.dydx.exchange/?json#cancel-an-order
+func (p Private) CancelOder(orderId string) (types.OrderCancelResponse, error) {
+	data, err := p.delete("orders/"+orderId, nil)
+	result := types.OrderCancelResponse{}
+	if err != nil {
+		return result, err
+	}
+	if err = json.Unmarshal(data, &result); err != nil {
+		return result, err
+	}
+	return result, nil
 }
 
-//取消订单
-func (p Private) GetOderById(orderId string) (*types.OrderResponse, error) {
-	res, reqErr := p.get("orders/"+orderId, nil)
+// GetOderById 查询订单
+// see https://docs.dydx.exchange/?json#get-order-by-id
+func (p Private) GetOderById(orderId string) (types.OrderResponse, error) {
+	res, err := p.get("orders/"+orderId, nil)
 
-	if reqErr == nil {
-		var orderResponse *types.OrderResponse
+	var orderResponse types.OrderResponse
+	if err == nil {
 		if err := json.Unmarshal(res, &orderResponse); err != nil {
-			return nil, err
+			return orderResponse, err
 		}
 		return orderResponse, nil
 	}
-	return nil, reqErr
+	return orderResponse, err
 }
 
 func (p Private) get(endpoint string, params url.Values) ([]byte, error) {
-	return p.execute(http.MethodGet, helpers.GenerateQueryPath(endpoint, params), "")
+	return p.request(http.MethodGet, helpers.GenerateQueryPath(endpoint, params), "")
 }
 
 func (p Private) post(endpoint string, data interface{}) ([]byte, error) {
 	marshalData, _ := json.Marshal(data)
-	return p.execute(http.MethodPost, endpoint, string(marshalData))
+	return p.request(http.MethodPost, endpoint, string(marshalData))
 }
 
-func (p Private) delete(endpoint string, data interface{}) ([]byte, error) {
-	if data != nil {
-		marshalData, _ := json.Marshal(data)
-		return p.execute(http.MethodDelete, endpoint, string(marshalData))
-	} else {
-		return p.execute(http.MethodDelete, endpoint, "")
-	}
+func (p Private) delete(endpoint string, params url.Values) ([]byte, error) {
+	return p.request(http.MethodGet, helpers.GenerateQueryPath(endpoint, params), "")
 }
 
-func (p Private) execute(method, endpoint string, data string) ([]byte, error) {
+func (p Private) request(method, endpoint string, data string) ([]byte, error) {
 	isoTimestamp := generateNowISO()
 	requestPath := fmt.Sprintf("/v3/%s", endpoint)
 	headers := map[string]string{
@@ -187,35 +174,26 @@ func (p Private) execute(method, endpoint string, data string) ([]byte, error) {
 		"DYDX-TIMESTAMP":  isoTimestamp,
 		"DYDX-PASSPHRASE": p.ApiKeyCredentials.Passphrase,
 	}
-	resp, err := p.doExecute(method, requestPath, headers, data)
+	resp, err := p.execute(method, requestPath, headers, data)
 	if err != nil {
-		p.Logger.Panic(err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode < http.StatusOK || resp.StatusCode > http.StatusIMUsed {
+	if resp.StatusCode < 200 || resp.StatusCode > 300 {
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(resp.Body)
-		p.Logger.Printf("wrong status code: %d,err msg:%s", resp.StatusCode, buf.String())
-		return nil, fmt.Errorf("wrong status code: %d", resp.StatusCode)
+		p.Logger.Printf("uri:%s, code: %d, err msg:%s", requestPath, resp.StatusCode, buf.String())
+		return nil, fmt.Errorf("uri:%v , status code: %d", requestPath, resp.StatusCode)
 	}
-
-	respBody, err := ioutil.ReadAll(resp.Body)
-	fmt.Printf("---->response body:%s\n", respBody)
-	if err != nil {
-		return nil, err
-	}
-	return respBody, nil
+	responseBody, err := ioutil.ReadAll(resp.Body)
+	p.Logger.Printf("uri:%s,response body:%s", requestPath, responseBody)
+	return responseBody, err
 }
 
-func (p Private) doExecute(method string, requestPath string, headers map[string]string, data string) (*http.Response, error) {
-	var req *http.Request
+func (p Private) execute(method string, requestPath string, headers map[string]string, data string) (*http.Response, error) {
 	requestPath = fmt.Sprintf("%s%s", p.Host, requestPath)
-	req, err := http.NewRequest(method, requestPath, strings.NewReader(data))
-	if err != nil {
-		return nil, errors.New("new request is fail: %v ")
-	}
+	req, _ := http.NewRequest(method, requestPath, strings.NewReader(data))
 
 	for key, val := range headers {
 		req.Header.Add(key, val)

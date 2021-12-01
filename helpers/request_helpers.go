@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
 	"math/rand"
 	"net/url"
@@ -27,7 +28,7 @@ func CreateTypedSignature(signature string, sigType int) string {
 }
 
 func fixRawSignature(signature string) string {
-	stripped := stripHexPrefix(signature)
+	stripped := strings.TrimPrefix(signature, "0x")
 	if len(stripped) != 130 {
 		panic(fmt.Sprintf("Invalid raw signature: %s", signature))
 	}
@@ -45,22 +46,6 @@ func fixRawSignature(signature string) string {
 	panic(fmt.Sprintf("Invalid v value: %s", v))
 }
 
-func stripHexPrefix(input string) string {
-	if strings.HasPrefix(input, "0x") {
-		return input[2:]
-	}
-	return input
-}
-
 func HashString(input string) string {
-	fact := solsha3.SoliditySHA3([]string{"string"}, []string{input})
-	return fmt.Sprintf("0x%x", fact)
-}
-
-func EcRecoverTypedSignature(hashVal, typedSignature string) string {
-	return ""
-}
-
-func AddressAreEqual(addrOne, AddrTow string) bool {
-	return false
+	return hexutil.Encode(solsha3.SoliditySHA3([]string{"string"}, input))
 }
