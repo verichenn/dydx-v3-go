@@ -1,8 +1,8 @@
 package modules
 
 import (
-	"dydx-v3-go/helpers"
 	"github.com/umbracle/go-web3/jsonrpc"
+	"github.com/verichenn/dydx-v3-go/helpers"
 )
 
 type EthSigner interface {

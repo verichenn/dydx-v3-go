@@ -1,13 +1,13 @@
 package dydx
 
 import (
-	"dydx-v3-go/helpers"
-	"dydx-v3-go/modules"
-	"dydx-v3-go/types"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
 	"github.com/umbracle/go-web3/jsonrpc"
+	"github.com/verichenn/dydx-v3-go/helpers"
+	"github.com/verichenn/dydx-v3-go/modules"
+	"github.com/verichenn/dydx-v3-go/types"
 	"testing"
 	"time"
 )

@@ -1,9 +1,9 @@
 package dydx
 
 import (
-	"dydx-v3-go/helpers"
-	"dydx-v3-go/modules"
 	"github.com/umbracle/go-web3/jsonrpc"
+	"github.com/verichenn/dydx-v3-go/helpers"
+	"github.com/verichenn/dydx-v3-go/modules"
 	"log"
 	"os"
 	"strings"

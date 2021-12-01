@@ -1,13 +1,13 @@
 package modules
 
 import (
-	"dydx-v3-go/helpers"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
+	"github.com/verichenn/dydx-v3-go/helpers"
 	"log"
 	"math/big"
 	"strings"
