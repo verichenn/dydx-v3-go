@@ -42,7 +42,7 @@ type Options struct {
 	NetworkId int
 }
 
-func DefaultClient(options Options) *Client {
+func NewClient(options Options) *Client {
 	client := &Client{
 		Host:              strings.TrimPrefix(options.Host, "/"),
 		ApiTimeout:        3 * time.Second,

@@ -31,19 +31,19 @@ var options = Options{
 }
 
 func TestGetAccount(t *testing.T) {
-	client := DefaultClient(options)
+	client := NewClient(options)
 	account, _ := client.Private.GetAccount("")
 	fmt.Println(account)
 }
 
 func TestGetPositions(t *testing.T) {
-	client := DefaultClient(options)
+	client := NewClient(options)
 	positions, _ := client.Private.GetPositions("BTC-USD")
 	fmt.Println(positions)
 }
 
 func TestCreateOrder(t *testing.T) {
-	client := DefaultClient(options)
+	client := NewClient(options)
 	apiOrder := &modules.ApiOrder{
 		ApiBaseOrder: modules.ApiBaseOrder{Expiration: expiration()},
 		Market:       "BTC-USD",
@@ -79,7 +79,7 @@ func TestDeriveStarkKey(t *testing.T) {
 }
 
 func TestCancelOrder(t *testing.T) {
-	client := DefaultClient(options)
+	client := NewClient(options)
 	data, err := client.Private.CancelOder("4bf8757c3ed8fb70a9c6e22f5b2fef5f4b4bd67113ed73c00f15874b2029b37")
 	if err != nil {
 		t.Error(err)
@@ -89,7 +89,7 @@ func TestCancelOrder(t *testing.T) {
 }
 
 func TestGetOrderById(t *testing.T) {
-	client := DefaultClient(options)
+	client := NewClient(options)
 	data, err := client.Private.GetOderById("4bf8757c3ed8fb70a9c6e22f5b2fef5f4b4bd67113ed73c00f15874b2029b37")
 	if err != nil {
 		t.Error(err)
@@ -99,7 +99,7 @@ func TestGetOrderById(t *testing.T) {
 }
 
 func TestGetOrders(t *testing.T) {
-	client := DefaultClient(options)
+	client := NewClient(options)
 	req := types.OrderQueryParam{
 		Market: "BTC-USD",
 		Limit:  100,
