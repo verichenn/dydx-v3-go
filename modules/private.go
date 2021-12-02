@@ -187,7 +187,7 @@ func (p Private) request(method, endpoint string, data string) ([]byte, error) {
 	isoTimestamp := generateNowISO()
 	requestPath := fmt.Sprintf("/v3/%s", endpoint)
 	headers := map[string]string{
-		"DYDX-SIGNATURE":  p.sign(requestPath, method, isoTimestamp, data),
+		"DYDX-SIGNATURE":  p.Sign(requestPath, method, isoTimestamp, data),
 		"DYDX-API-KEY":    p.ApiKeyCredentials.Key,
 		"DYDX-TIMESTAMP":  isoTimestamp,
 		"DYDX-PASSPHRASE": p.ApiKeyCredentials.Passphrase,
@@ -230,7 +230,7 @@ func generateNowISO() string {
 	return time.Now().UTC().Format("2006-01-02T15:04:05.999Z")
 }
 
-func (p Private) sign(requestPath, method, isoTimestamp, body string) string {
+func (p Private) Sign(requestPath, method, isoTimestamp, body string) string {
 	message := fmt.Sprintf("%s%s%s%s", isoTimestamp, method, requestPath, body)
 	secret, _ := base64.URLEncoding.DecodeString(p.ApiKeyCredentials.Secret)
 	h := hmac.New(sha256.New, secret)
