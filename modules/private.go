@@ -123,9 +123,9 @@ func (p Private) GetOrders(input *types.OrderQueryParam) (*types.OrderListRespon
 	return nil, err
 }
 
-// CancelOder 取消订单
+// CancelOrder 取消订单
 // see https://docs.dydx.exchange/?json#cancel-an-order
-func (p Private) CancelOder(orderId string) (*types.CancelOrderResponse, error) {
+func (p Private) CancelOrder(orderId string) (*types.CancelOrderResponse, error) {
 	data, err := p.delete("orders/"+orderId, nil)
 	result := &types.CancelOrderResponse{}
 	if err != nil {
@@ -137,9 +137,9 @@ func (p Private) CancelOder(orderId string) (*types.CancelOrderResponse, error) 
 	return result, nil
 }
 
-// GetOderById 查询订单
+// GetOrderById 查询订单
 // see https://docs.dydx.exchange/?json#get-order-by-id
-func (p Private) GetOderById(orderId string) (*types.OrderResponse, error) {
+func (p Private) GetOrderById(orderId string) (*types.OrderResponse, error) {
 	res, err := p.get("orders/"+orderId, nil)
 
 	orderResponse := &types.OrderResponse{}

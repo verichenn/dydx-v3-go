@@ -76,7 +76,7 @@ func TestDeriveStarkKey(t *testing.T) {
 
 func TestCancelOrder(t *testing.T) {
 	client := NewClient(options)
-	data, err := client.Private.CancelOder("4bf8757c3ed8fb70a9c6e22f5b2fef5f4b4bd67113ed73c00f15874b2029b37")
+	data, err := client.Private.CancelOrder("4bf8757c3ed8fb70a9c6e22f5b2fef5f4b4bd67113ed73c00f15874b2029b37")
 	if err != nil {
 		t.Error(err)
 	} else {
@@ -86,7 +86,7 @@ func TestCancelOrder(t *testing.T) {
 
 func TestGetOrderById(t *testing.T) {
 	client := NewClient(options)
-	data, err := client.Private.GetOderById("4bf8757c3ed8fb70a9c6e22f5b2fef5f4b4bd67113ed73c00f15874b2029b37")
+	data, err := client.Private.GetOrderById("4bf8757c3ed8fb70a9c6e22f5b2fef5f4b4bd67113ed73c00f15874b2029b37")
 	if err != nil {
 		t.Error(err)
 	} else {
