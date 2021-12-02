@@ -73,7 +73,7 @@ func (a *SignOnboardingAction) GetEIP712Message(message map[string]interface{}) 
 		"primaryType": structName,
 		"message":     message,
 	}
-	if a.NetworkId == helpers.NetworkIdMainnet {
+	if a.NetworkId == common.NetworkIdMainnet {
 		msg := eip712Message["message"].(map[string]interface{})
 		msg["onlySignOn"] = "https://trade.dydx.exchange"
 	}
@@ -92,13 +92,13 @@ func (a *SignOnboardingAction) GetEip712Hash(structHash string) string {
 func (a *SignOnboardingAction) GetDomainHash() string {
 	fact := solsha3.SoliditySHA3(
 		[]string{"bytes32", "bytes32", "bytes32", "uint256"},
-		[]interface{}{helpers.HashString(Eip712DomainStringNoContract), helpers.HashString(Domain), helpers.HashString(Version), a.NetworkId},
+		[]interface{}{common.HashString(Eip712DomainStringNoContract), common.HashString(Domain), common.HashString(Version), a.NetworkId},
 	)
 	return fmt.Sprintf("0x%x", fact)
 }
 
 func (a *SignOnboardingAction) GetEIP712Struct() []map[string]string {
-	if a.NetworkId == helpers.NetworkIdMainnet {
+	if a.NetworkId == common.NetworkIdMainnet {
 		return Eip712OnboardingActionStruct
 	} else {
 		return Eip712OnboardingActionStructTestnet
@@ -111,18 +111,18 @@ func (a *SignOnboardingAction) GetEIP712StructName() string {
 
 func (a *SignOnboardingAction) GetHash(action string) string {
 	var eip712StructStr string
-	if a.NetworkId == helpers.NetworkIdMainnet {
+	if a.NetworkId == common.NetworkIdMainnet {
 		eip712StructStr = Eip712OnboardingActionStructString
 	} else {
 		eip712StructStr = Eip712OnboardingActionStructStringTestnet
 	}
 	data := [][]string{
 		{"bytes32", "bytes32"},
-		{helpers.HashString(eip712StructStr), helpers.HashString(action)},
+		{common.HashString(eip712StructStr), common.HashString(action)},
 	}
-	if a.NetworkId == helpers.NetworkIdMainnet {
+	if a.NetworkId == common.NetworkIdMainnet {
 		data[0] = append(data[0], "bytes32")
-		data[1] = append(data[1], helpers.HashString(OnlySignOnDomainMainnet))
+		data[1] = append(data[1], common.HashString(OnlySignOnDomainMainnet))
 	}
 	structHash := solsha3.SoliditySHA3(data[0], data[1])
 	return a.GetEip712Hash(hexutil.Encode(structHash))

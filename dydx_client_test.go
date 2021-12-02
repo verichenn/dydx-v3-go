@@ -18,7 +18,7 @@ const (
 )
 
 var options = Options{
-	Host:                      helpers.ApiHostMainnet,
+	Host:                      common.ApiHostMainnet,
 	StarkPublicKey:            "",
 	StarkPrivateKey:           "",
 	StarkPublicKeyYCoordinate: "",
@@ -45,13 +45,13 @@ func TestGetPositions(t *testing.T) {
 func TestCreateOrder(t *testing.T) {
 	client := NewClient(options)
 	apiOrder := &modules.ApiOrder{
-		ApiBaseOrder: modules.ApiBaseOrder{Expiration: helpers.ExpireAfter(5 * time.Minute)},
+		ApiBaseOrder: modules.ApiBaseOrder{Expiration: common.ExpireAfter(5 * time.Minute)},
 		Market:       "BTC-USD",
 		Side:         "BUY",
 		Type:         "LIMIT",
 		Size:         "0.001",
 		Price:        "1",
-		ClientId:     helpers.RandomClientId(),
+		ClientId:     common.RandomClientId(),
 		TimeInForce:  "GTT",
 		PostOnly:     true,
 		LimitFee:     "0.0015",
@@ -63,9 +63,9 @@ func TestCreateOrder(t *testing.T) {
 func TestSignViaLocalNode(t *testing.T) {
 	web3, _ := jsonrpc.NewClient("http://localhost:8545")
 	signer := &modules.EthWeb3Signer{Web3: web3}
-	actionSinger := modules.NewSigner(signer, helpers.NetworkIdMainnet)
+	actionSinger := modules.NewSigner(signer, common.NetworkIdMainnet)
 	sign := actionSinger.Sign(EthereumAddress,
-		map[string]interface{}{"action": helpers.OffChainOnboardingAction})
+		map[string]interface{}{"action": common.OffChainOnboardingAction})
 	fmt.Println(sign)
 }
 

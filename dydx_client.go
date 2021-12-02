@@ -66,7 +66,7 @@ func NewClient(options Options) *Client {
 	}
 
 	if client.NetworkId == 0 {
-		client.NetworkId = helpers.NetworkIdMainnet
+		client.NetworkId = common.NetworkIdMainnet
 	}
 
 	if options.StarkPrivateKey != "" {

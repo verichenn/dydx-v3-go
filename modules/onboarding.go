@@ -31,7 +31,7 @@ type ApiKeyCredentials struct {
 }
 
 func (board OnBoarding) RecoverDefaultApiCredentials(ethereumAddress string) *ApiKeyCredentials {
-	signature := board.Singer.Sign(ethereumAddress, map[string]interface{}{"action": helpers.OffChainOnboardingAction})
+	signature := board.Singer.Sign(ethereumAddress, map[string]interface{}{"action": common.OffChainOnboardingAction})
 	rHex := signature[2:66]
 	rInt, _ := math.MaxBig256.SetString(rHex, 16)
 
@@ -60,7 +60,7 @@ func (board OnBoarding) RecoverDefaultApiCredentials(ethereumAddress string) *Ap
 }
 
 func (board OnBoarding) DeriveStarkKey(ethereumAddress string) string {
-	signature := board.Singer.Sign(ethereumAddress, map[string]interface{}{"action": helpers.OffChainKeyDerivationAction})
+	signature := board.Singer.Sign(ethereumAddress, map[string]interface{}{"action": common.OffChainKeyDerivationAction})
 	sig, _ := new(big.Int).SetString(signature, 0)
 
 	sha3 := solsha3.SoliditySHA3([]string{"uint256"}, sig.String())
