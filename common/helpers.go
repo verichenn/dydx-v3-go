@@ -49,3 +49,7 @@ func fixRawSignature(signature string) string {
 func HashString(input string) string {
 	return hexutil.Encode(solsha3.SoliditySHA3([]string{"string"}, input))
 }
+
+func ExpireAfter(duration time.Duration) string {
+	return time.Now().Add(duration).UTC().Format("2006-01-02T15:04:05.999Z")
+}

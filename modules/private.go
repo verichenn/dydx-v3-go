@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/verichenn/dydx-v3-go/helpers"
+	"github.com/verichenn/dydx-v3-go/common"
 	"github.com/verichenn/dydx-v3-go/types"
 	"github.com/yanue/starkex"
 	"io/ioutil"
@@ -51,22 +51,22 @@ type ApiOrder struct {
 
 // GetAccount 查询账户
 // see https://docs.dydx.exchange/?json#get-account
-func (p Private) GetAccount(ethereumAddress string) (types.AccountResponse, error) {
+func (p Private) GetAccount(ethereumAddress string) (*types.AccountResponse, error) {
 	if ethereumAddress == "" {
 		ethereumAddress = p.DefaultAddress
 	}
 	uri := fmt.Sprintf("accounts/%s", helpers.GetAccountId(ethereumAddress))
 	res, _ := p.get(uri, nil)
-	accountResponse := types.AccountResponse{}
-	if err := json.Unmarshal(res, &accountResponse); err != nil {
-		return accountResponse, err
+	accountResponse := &types.AccountResponse{}
+	if err := json.Unmarshal(res, accountResponse); err != nil {
+		return nil, err
 	}
 	return accountResponse, nil
 }
 
 // CreateOrder 创建订单
 // see https://docs.dydx.exchange/?json#create-a-new-order
-func (p Private) CreateOrder(input *ApiOrder, positionId int64) (types.OrderResponse, error) {
+func (p Private) CreateOrder(input *ApiOrder, positionId int64) (*types.OrderResponse, error) {
 	orderSignParam := starkex.OrderSignParam{
 		NetworkId:  p.NetworkId,
 		PositionId: positionId,
@@ -80,76 +80,76 @@ func (p Private) CreateOrder(input *ApiOrder, positionId int64) (types.OrderResp
 	}
 	signature, err := starkex.OrderSign(p.StarkPrivateKey[2:], orderSignParam)
 
-	orderResponse := types.OrderResponse{}
+	orderResponse := &types.OrderResponse{}
 	if err != nil {
-		return orderResponse, errors.New("sign error")
+		return nil, errors.New("sign error")
 	}
 	input.Signature = signature
 	res, _ := p.post("orders", input)
 
-	if err = json.Unmarshal(res, &orderResponse); err != nil {
-		return orderResponse, err
+	if err = json.Unmarshal(res, orderResponse); err != nil {
+		return nil, err
 	}
 	return orderResponse, nil
 }
 
 // GetPositions 查询持仓
 // see https://docs.dydx.exchange/?json#get-positions
-func (p Private) GetPositions(market string) (types.PositionResponse, error) {
+func (p Private) GetPositions(market string) (*types.PositionResponse, error) {
 	params := url.Values{}
 	params.Add("market", market)
 	res, err := p.get("positions", params)
-	position := types.PositionResponse{}
+	position := &types.PositionResponse{}
 	if err != nil {
-		return position, errors.New("request error")
+		return nil, errors.New("request error")
 	}
 	if err = json.Unmarshal(res, &position); err != nil {
-		return position, errors.New("json parser error")
+		return nil, errors.New("json parser error")
 	}
 	return position, nil
 }
 
 // GetOrders 查询订单列表
 // see https://docs.dydx.exchange/?json#get-orders
-func (p Private) GetOrders(input *types.OrderQueryParam) (types.OrderListResponse, error) {
-	var result types.OrderListResponse
+func (p Private) GetOrders(input *types.OrderQueryParam) (*types.OrderListResponse, error) {
+	result := &types.OrderListResponse{}
 	data, err := p.get("orders", input.ToParams())
 	if err == nil {
 		if err := json.Unmarshal(data, &result); err != nil {
-			return result, err
+			return nil, err
 		}
 		return result, nil
 	}
-	return result, err
+	return nil, err
 }
 
 // CancelOder 取消订单
 // see https://docs.dydx.exchange/?json#cancel-an-order
-func (p Private) CancelOder(orderId string) (types.OrderCancelResponse, error) {
+func (p Private) CancelOder(orderId string) (*types.CancelOrderResponse, error) {
 	data, err := p.delete("orders/"+orderId, nil)
-	result := types.OrderCancelResponse{}
+	result := &types.CancelOrderResponse{}
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 	if err = json.Unmarshal(data, &result); err != nil {
-		return result, err
+		return nil, err
 	}
 	return result, nil
 }
 
 // GetOderById 查询订单
 // see https://docs.dydx.exchange/?json#get-order-by-id
-func (p Private) GetOderById(orderId string) (types.OrderResponse, error) {
+func (p Private) GetOderById(orderId string) (*types.OrderResponse, error) {
 	res, err := p.get("orders/"+orderId, nil)
 
-	var orderResponse types.OrderResponse
+	orderResponse := &types.OrderResponse{}
 	if err == nil {
 		if err := json.Unmarshal(res, &orderResponse); err != nil {
-			return orderResponse, err
+			return nil, err
 		}
 		return orderResponse, nil
 	}
-	return orderResponse, err
+	return nil, err
 }
 
 func (p Private) get(endpoint string, params url.Values) ([]byte, error) {

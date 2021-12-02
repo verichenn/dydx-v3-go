@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
-	"github.com/verichenn/dydx-v3-go/helpers"
+	"github.com/verichenn/dydx-v3-go/common"
 )
 
 const (

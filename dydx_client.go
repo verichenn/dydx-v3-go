@@ -2,7 +2,7 @@ package dydx
 
 import (
 	"github.com/umbracle/go-web3/jsonrpc"
-	"github.com/verichenn/dydx-v3-go/helpers"
+	"github.com/verichenn/dydx-v3-go/common"
 	"github.com/verichenn/dydx-v3-go/modules"
 	"log"
 	"os"
@@ -34,7 +34,7 @@ type Options struct {
 	Host                      string
 	StarkPublicKey            string
 	StarkPrivateKey           string
-	starkPublicKeyYCoordinate string
+	StarkPublicKeyYCoordinate string
 	DefaultEthereumAddress    string
 	ApiKeyCredentials         *modules.ApiKeyCredentials
 

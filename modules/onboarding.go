@@ -7,7 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
-	"github.com/verichenn/dydx-v3-go/helpers"
+	"github.com/verichenn/dydx-v3-go/common"
 	"log"
 	"math/big"
 	"strings"

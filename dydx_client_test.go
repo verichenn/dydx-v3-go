@@ -5,7 +5,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
 	"github.com/umbracle/go-web3/jsonrpc"
-	"github.com/verichenn/dydx-v3-go/helpers"
+	"github.com/verichenn/dydx-v3-go/common"
 	"github.com/verichenn/dydx-v3-go/modules"
 	"github.com/verichenn/dydx-v3-go/types"
 	"testing"
@@ -21,7 +21,7 @@ var options = Options{
 	Host:                      helpers.ApiHostMainnet,
 	StarkPublicKey:            "",
 	StarkPrivateKey:           "",
-	starkPublicKeyYCoordinate: "",
+	StarkPublicKeyYCoordinate: "",
 	DefaultEthereumAddress:    "",
 	ApiKeyCredentials: &modules.ApiKeyCredentials{
 		Key:        "",
@@ -45,7 +45,7 @@ func TestGetPositions(t *testing.T) {
 func TestCreateOrder(t *testing.T) {
 	client := NewClient(options)
 	apiOrder := &modules.ApiOrder{
-		ApiBaseOrder: modules.ApiBaseOrder{Expiration: expiration()},
+		ApiBaseOrder: modules.ApiBaseOrder{Expiration: helpers.ExpireAfter(5 * time.Minute)},
 		Market:       "BTC-USD",
 		Side:         "BUY",
 		Type:         "LIMIT",
@@ -58,10 +58,6 @@ func TestCreateOrder(t *testing.T) {
 	}
 	order, _ := client.Private.CreateOrder(apiOrder, 144336)
 	fmt.Println(order)
-}
-
-func expiration() string {
-	return time.Now().Add(5 * time.Minute).UTC().Format("2006-01-02T15:04:05.999Z")
 }
 
 func TestSignViaLocalNode(t *testing.T) {

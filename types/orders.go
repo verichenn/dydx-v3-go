@@ -10,7 +10,7 @@ type OrderResponse struct {
 	Order Order `json:"order"`
 }
 
-type OrderCancelResponse struct {
+type CancelOrderResponse struct {
 	CancelOrder Order `json:"cancelOrder"`
 }
 
