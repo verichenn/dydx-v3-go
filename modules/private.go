@@ -55,7 +55,7 @@ func (p Private) GetAccount(ethereumAddress string) (*types.AccountResponse, err
 	if ethereumAddress == "" {
 		ethereumAddress = p.DefaultAddress
 	}
-	uri := fmt.Sprintf("accounts/%s", helpers.GetAccountId(ethereumAddress))
+	uri := fmt.Sprintf("accounts/%s", common.GetAccountId(ethereumAddress))
 	res, _ := p.get(uri, nil)
 	accountResponse := &types.AccountResponse{}
 	if err := json.Unmarshal(res, accountResponse); err != nil {
@@ -153,7 +153,7 @@ func (p Private) GetOderById(orderId string) (*types.OrderResponse, error) {
 }
 
 func (p Private) get(endpoint string, params url.Values) ([]byte, error) {
-	return p.request(http.MethodGet, helpers.GenerateQueryPath(endpoint, params), "")
+	return p.request(http.MethodGet, common.GenerateQueryPath(endpoint, params), "")
 }
 
 func (p Private) post(endpoint string, data interface{}) ([]byte, error) {
@@ -162,7 +162,7 @@ func (p Private) post(endpoint string, data interface{}) ([]byte, error) {
 }
 
 func (p Private) delete(endpoint string, params url.Values) ([]byte, error) {
-	return p.request(http.MethodGet, helpers.GenerateQueryPath(endpoint, params), "")
+	return p.request(http.MethodGet, common.GenerateQueryPath(endpoint, params), "")
 }
 
 func (p Private) request(method, endpoint string, data string) ([]byte, error) {

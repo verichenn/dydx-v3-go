@@ -15,7 +15,7 @@ type EthWeb3Signer struct {
 
 func (web3Singer *EthWeb3Signer) sign(eip712Message map[string]interface{}, messageHash, address string) string {
 	rawSignature := signTypedData(eip712Message, web3Singer, address)
-	return helpers.CreateTypedSignature(rawSignature, helpers.SignatureTypeNoPrepend)
+	return common.CreateTypedSignature(rawSignature, common.SignatureTypeNoPrepend)
 }
 
 //https://github.com/dydxprotocol/dydx-v3-python/issues/62
