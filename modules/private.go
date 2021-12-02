@@ -80,13 +80,13 @@ func (p Private) CreateOrder(input *ApiOrder, positionId int64) (*types.OrderRes
 	}
 	signature, err := starkex.OrderSign(p.StarkPrivateKey[2:], orderSignParam)
 
-	orderResponse := &types.OrderResponse{}
 	if err != nil {
 		return nil, errors.New("sign error")
 	}
 	input.Signature = signature
 	res, _ := p.post("orders", input)
 
+	orderResponse := &types.OrderResponse{}
 	if err = json.Unmarshal(res, orderResponse); err != nil {
 		return nil, err
 	}
@@ -97,12 +97,14 @@ func (p Private) CreateOrder(input *ApiOrder, positionId int64) (*types.OrderRes
 // see https://docs.dydx.exchange/?json#get-positions
 func (p Private) GetPositions(market string) (*types.PositionResponse, error) {
 	params := url.Values{}
-	params.Add("market", market)
+	if market != "" {
+		params.Add("market", market)
+	}
 	res, err := p.get("positions", params)
-	position := &types.PositionResponse{}
 	if err != nil {
 		return nil, errors.New("request error")
 	}
+	position := &types.PositionResponse{}
 	if err = json.Unmarshal(res, &position); err != nil {
 		return nil, errors.New("json parser error")
 	}
@@ -112,8 +114,8 @@ func (p Private) GetPositions(market string) (*types.PositionResponse, error) {
 // GetOrders 查询订单列表
 // see https://docs.dydx.exchange/?json#get-orders
 func (p Private) GetOrders(input *types.OrderQueryParam) (*types.OrderListResponse, error) {
-	result := &types.OrderListResponse{}
 	data, err := p.get("orders", input.ToParams())
+	result := &types.OrderListResponse{}
 	if err == nil {
 		if err := json.Unmarshal(data, &result); err != nil {
 			return nil, err
@@ -127,11 +129,27 @@ func (p Private) GetOrders(input *types.OrderQueryParam) (*types.OrderListRespon
 // see https://docs.dydx.exchange/?json#cancel-an-order
 func (p Private) CancelOrder(orderId string) (*types.CancelOrderResponse, error) {
 	data, err := p.delete("orders/"+orderId, nil)
-	result := &types.CancelOrderResponse{}
 	if err != nil {
 		return nil, err
 	}
+	result := &types.CancelOrderResponse{}
 	if err = json.Unmarshal(data, &result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (p Private) CancelOrders(market string) (*types.CancelOrdersResponse, error) {
+	values := url.Values{}
+	if market != "" {
+		values.Add("market", market)
+	}
+	resp, err := p.delete("orders", values)
+	if err != nil {
+		return nil, err
+	}
+	result := &types.CancelOrdersResponse{}
+	if err := json.Unmarshal(resp, result); err != nil {
 		return nil, err
 	}
 	return result, nil

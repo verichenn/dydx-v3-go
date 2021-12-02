@@ -14,6 +14,10 @@ type CancelOrderResponse struct {
 	CancelOrder Order `json:"cancelOrder"`
 }
 
+type CancelOrdersResponse struct {
+	CancelOrders Order `json:"cancelOrder"`
+}
+
 type Order struct {
 	ID              string    `json:"id"`
 	ClientID        string    `json:"clientId"`
