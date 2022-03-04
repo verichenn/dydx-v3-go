@@ -8,15 +8,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/verichenn/dydx-v3-go/common"
-	"github.com/verichenn/dydx-v3-go/types"
-	"github.com/yanue/starkex"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/verichenn/dydx-v3-go/common"
+	"github.com/verichenn/dydx-v3-go/types"
+	"github.com/yanue/starkex"
 )
 
 type Private struct {
@@ -78,13 +79,15 @@ func (p Private) CreateOrder(input *ApiOrder, positionId int64) (*types.OrderRes
 		ClientId:   input.ClientId,
 		Expiration: input.Expiration,
 	}
-	signature, err := starkex.OrderSign(p.StarkPrivateKey[2:], orderSignParam)
-
+	signature, err := starkex.OrderSign(p.StarkPrivateKey, orderSignParam)
 	if err != nil {
 		return nil, errors.New("sign error")
 	}
 	input.Signature = signature
-	res, _ := p.post("orders", input)
+	res, err := p.post("orders", input)
+	if err != nil {
+		return nil, err
+	}
 
 	orderResponse := &types.OrderResponse{}
 	if err = json.Unmarshal(res, orderResponse); err != nil {
